@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 5d133deeaa66ed445853e946ff25e073, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
+  m_IndirectSpecularColor: {r: 0.21108171, g: 0.05813721, b: 0.036018983, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -422,15 +422,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4618067678013112272, guid: c63c623c20a6a6146b4bcc0e2c9c6f67, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2455.9
+      value: 2478
       objectReference: {fileID: 0}
     - target: {fileID: 4618067678013112272, guid: c63c623c20a6a6146b4bcc0e2c9c6f67, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -459.2
+      value: -517.3
       objectReference: {fileID: 0}
     - target: {fileID: 4618067678013112272, guid: c63c623c20a6a6146b4bcc0e2c9c6f67, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2890
+      value: -3116.2
       objectReference: {fileID: 0}
     - target: {fileID: 4618067678013112272, guid: c63c623c20a6a6146b4bcc0e2c9c6f67, type: 3}
       propertyPath: m_LocalRotation.w
@@ -504,8 +504,8 @@ Camera:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.38883945, g: 0.5455126, b: 0.8018868, a: 0}
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 1, g: 0.3339622, b: 0.3339622, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -566,7 +566,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1395973041}
-  Offset: {x: 25.5, y: 18, z: -0.9}
+  Offset: {x: 46.6, y: 23.43, z: 11.1}
 --- !u!1 &1395973038 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4618067678013112279, guid: c63c623c20a6a6146b4bcc0e2c9c6f67, type: 3}
@@ -591,18 +591,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floatForce: 2
   m_InitialPos: {x: 2475.2202, y: -571.5513, z: -2801.2358}
-  m_PlaneInitialPos: {x: 2455.9, y: -459.2, z: -2890}
-  m_Speed: 25
+  m_PlaneInitialPos: {x: 2475.2202, y: -533.72, z: -3116.2}
+  m_Speed: 35
   PositiveRotationSpeed: 100
   NegativeRotationSpeed: 1.5
-  m_UpBound: -380
+  m_UpBound: -500
   _PlatformsPool:
   - {fileID: 21995153333981473, guid: 5411d9c1862ed934c9579c99532520bf, type: 3}
+  - {fileID: 21995153333981473, guid: f5873df79a82453479cae018d579a2d0, type: 3}
   - {fileID: 21995153333981473, guid: 5411d9c1862ed934c9579c99532520bf, type: 3}
-  - {fileID: 21995153333981473, guid: 5411d9c1862ed934c9579c99532520bf, type: 3}
-  - {fileID: 21995153333981473, guid: 5411d9c1862ed934c9579c99532520bf, type: 3}
+  - {fileID: 21995153333981473, guid: f5873df79a82453479cae018d579a2d0, type: 3}
   m_ObjectFromPool: {fileID: 0}
-  m_DistanceBetweenPlatform: 497
+  m_DistanceBetweenPlatform: 500
+  target: {fileID: 0}
 --- !u!54 &1395973047
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -47,6 +47,8 @@ namespace com.CasualGames.SwoopGame
 
         public static Action _PlaneCrashed;
 
+        public GameObject target;
+
         void Start()
         {
             Initialize();
@@ -54,10 +56,15 @@ namespace com.CasualGames.SwoopGame
 
         private void OnTriggerEnter(Collider other)
         {
+            Gem gem;
+            if (other.GetComponent<Gem>() != null)
+            {
+                gem = other.GetComponent<Gem>();
+                StartCoroutine(gem.KillGem());
+            }
    
             if (other.tag == "Crash")
             {
-                print("Trigger");
                 m_PlaneCrashed = true;
                 _Platforms.Clear();
                 _PlaneCrashed?.Invoke();
@@ -68,7 +75,7 @@ namespace com.CasualGames.SwoopGame
                 CollidedObject = other.gameObject;
 
                 m_ObjectFromPool = _Platforms.Dequeue();
-                m_ObjectFromPool.transform.position = new Vector3(other.transform.position.x+4f, other.transform.position.y, other.transform.position.z + m_DistanceBetweenPlatform);
+                m_ObjectFromPool.transform.position = new Vector3(m_InitialPos.x, other.transform.position.y, other.transform.position.z + m_DistanceBetweenPlatform);
                 m_ObjectFromPool.transform.gameObject.SetActive(true);
                 m_TriggeredOnce = true;
             }
@@ -79,10 +86,6 @@ namespace com.CasualGames.SwoopGame
             if (transform.position.y > m_UpBound)
             {
                 this.transform.position = new Vector3(this.transform.position.x, m_UpBound, this.transform.position.z);
-            }
-            else
-            {
-                print("inside the bound");
             }
             MovePlane();
         }
@@ -142,23 +145,6 @@ namespace com.CasualGames.SwoopGame
             m_ObjectFromPool.transform.gameObject.SetActive(true);
         }
 
-        private void MovePlaneUpward()
-        {
-            // Limit the upward movement by setting the y-velocity to a maximum value
-            //if(transform.position.y < m_UpBound)
-            //{
-            //    m_RigidBody.velocity = new Vector3(m_RigidBody.velocity.x,0, m_RigidBody.velocity.z);
-            //}
-            //else
-            //{
-            //    m_RigidBody.velocity = Vector3.up * floatForce;
-            //    if (m_RigidBody.velocity.y > floatForce)
-            //    {
-            //        m_RigidBody.velocity = new Vector3(m_RigidBody.velocity.x, floatForce, m_RigidBody.velocity.z);
-            //    }
-
-            //}
-        }
 
     }
 }
