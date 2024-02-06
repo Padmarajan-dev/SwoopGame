@@ -3,33 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace com.CasualGames.SwoopGame
 {
     public class Plane : MonoBehaviour
     {
+        [Header("Plane Props")]
 
         [SerializeField] private float floatForce;
 
         [SerializeField] private Vector3 m_InitialPos;
-      
+
+        [SerializeField] private Vector3 m_PlaneInitialPos;
+
         private Rigidbody m_RigidBody;
-
-        public float verticalInput = 0;
-
-        float Adder = 0.05f;
 
         [SerializeField] private float m_Speed;
 
-        [SerializeField] private float m_RotateSpeed;
-
         public float PositiveRotationSpeed = 10;
-
-        [SerializeField] float currentAngle = 0.0f;
 
         public float NegativeRotationSpeed;
 
         private GameObject CollidedObject;
+
+        [SerializeField] private float m_UpBound;
+
+        [Header("PlatformPoolProps")]
 
         public List<GameObject> _PlatformsPool;
 
@@ -41,13 +41,96 @@ namespace com.CasualGames.SwoopGame
 
         [SerializeField] private float m_DistanceBetweenPlatform;
 
+        [Header("Plane crash Props")]
+
+        private bool m_PlaneCrashed;
+
+        public static Action _PlaneCrashed;
+
         void Start()
+        {
+            Initialize();
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+   
+            if (other.tag == "Crash")
+            {
+                print("Trigger");
+                m_PlaneCrashed = true;
+                _Platforms.Clear();
+                _PlaneCrashed?.Invoke();
+            }
+
+            if (other.tag == "PlatformTrigger" && !m_TriggeredOnce && !m_PlaneCrashed)
+            {
+                CollidedObject = other.gameObject;
+
+                m_ObjectFromPool = _Platforms.Dequeue();
+                m_ObjectFromPool.transform.position = new Vector3(other.transform.position.x+4f, other.transform.position.y, other.transform.position.z + m_DistanceBetweenPlatform);
+                m_ObjectFromPool.transform.gameObject.SetActive(true);
+                m_TriggeredOnce = true;
+            }
+
+        }
+        void Update()
+        {
+            if (transform.position.y > m_UpBound)
+            {
+                this.transform.position = new Vector3(this.transform.position.x, m_UpBound, this.transform.position.z);
+            }
+            else
+            {
+                print("inside the bound");
+            }
+            MovePlane();
+        }
+
+        private void MovePlane()
+        {
+            if (m_PlaneCrashed)
+            {
+                m_RigidBody.useGravity = false;
+                return;
+            }
+
+            if (CollidedObject && Vector3.Distance(CollidedObject.transform.position, this.transform.position) > 464.5f)
+            {
+                CollidedObject.transform.parent.gameObject.SetActive(false);
+                _Platforms.Enqueue(CollidedObject.transform.parent.gameObject);
+                CollidedObject = null;
+                m_TriggeredOnce = false;
+            }
+
+            transform.Translate(transform.InverseTransformDirection(transform.forward) * Time.deltaTime * m_Speed);
+            if (Input.GetMouseButton(0))
+            {
+                //m_RigidBody.useGravity = false;
+                transform.Translate(transform.InverseTransformDirection(transform.up) * Time.deltaTime * floatForce);
+                transform.Rotate(Vector3.right * Time.deltaTime * -PositiveRotationSpeed);
+                //MovePlaneUpward();
+            }
+            else
+            {
+                //m_RigidBody.useGravity = true;
+                Quaternion targetRotation = Quaternion.Euler(90, 0, 0);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, NegativeRotationSpeed * Time.deltaTime);
+                transform.Translate(transform.InverseTransformDirection(-transform.up) * Time.deltaTime * floatForce);
+            }
+        }
+
+        //to initialize and reset plane
+        private void Initialize()
         {
             if (GetComponent<Rigidbody>() != null)
             {
                 m_RigidBody = GetComponent<Rigidbody>();
             }
 
+            m_PlaneCrashed = false;
+
+            this.transform.position = m_PlaneInitialPos;
             foreach (GameObject p in _PlatformsPool)
             {
                 GameObject platform = Instantiate(p);
@@ -59,120 +142,24 @@ namespace com.CasualGames.SwoopGame
             m_ObjectFromPool.transform.gameObject.SetActive(true);
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void MovePlaneUpward()
         {
-
-            if (other.tag == "PlatformTrigger" && !m_TriggeredOnce)
-            {
-                CollidedObject = other.gameObject;
-
-                m_ObjectFromPool = _Platforms.Dequeue();
-                m_ObjectFromPool.transform.position = new Vector3(other.transform.position.x+4f, other.transform.position.y, other.transform.position.z + m_DistanceBetweenPlatform);
-                m_ObjectFromPool.transform.gameObject.SetActive(true);
-                m_TriggeredOnce = true;
-            }
-
-        }
-
-        //private void Update()
-        //{
-        //    RotateAroundHill();
-
-        //    if (Input.GetMouseButton(0))
-        //    {
-        //        FlipAndMoveUp();
-        //    }
-        //    else
-        //    {
-        //        FallDown();
-        //    }
-        //    //movY = Input.GetAxis("Vertical");
-        //}
-
-        //// Update is called once per frame
-        //void FixedUpdate()
-        //{
-
-
-
-        //}
-
-
-        //void MovePlane()
-        //{
-
-        //    //Vector3 positionOnOrbit = RotateAroundTarget.transform.position; /*+ Quaternion.AngleAxis(currentAngle += m_Speed * Time.deltaTime, -RotateAroundTarget.transform.up)*/ /** radius;*/
-
-        //    //this.transform.position = positionOnOrbit;
-        //    //print("look at: " + positionOnOrbit + Vector3.forward);
-        //    //transform.LookAt(positionOnOrbit + Vector3.forward);
-
-        //    ////if (isMousePressed)
-        //    ////{
-        //    //    transform.Rotate(-Vector3.forward * verticalInput * Time.deltaTime * -m_RotateSpeed);
-        //    ////}
-        //    ///
-        //    transform.RotateAround(RotateAroundTarget.transform.position, Vector3.down, 30 * Time.deltaTime);
-        //    if (isMousePressed)
-        //    {
-        //        transform.Rotate(Vector3.right * Time.deltaTime * -PositiveRotationSpeed);
-        //        transform.Translate(Vector3.up * Time.deltaTime * floatForce);
-        //    }
-        //    else
-        //    {
-        //        Quaternion targetRotation = Quaternion.Euler(90, 182.184f, 0);
-        //        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, NegativeRotationSpeed * Time.deltaTime);
-        //        transform.Translate(-transform.up * Time.deltaTime * floatForce);
-        //    }
-
-        //    //Vector3 newPosition = transform.position;
-        //    //newPosition.z = initialZPosition;
-        //    //transform.position = newPosition;
-
-        //}
-
-        //void RotateAroundHill()
-        //{
-        //    transform.RotateAround(RotateAroundTarget.transform.position, Vector3.up, 30f * Time.deltaTime);
-        //}
-
-        //void FlipAndMoveUp()
-        //{
-        //    transform.Rotate(Vector3.right * Time.deltaTime * -PositiveRotationSpeed);
-        //    transform.Translate(Vector3.up * Time.deltaTime * floatForce, Space.World);
-        //}
-
-        //void FallDown()
-        //{
-        //    Quaternion targetRotation = Quaternion.Euler(90, 182.184f, 0);
-        //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, NegativeRotationSpeed * Time.deltaTime);
-        //    transform.Translate(-transform.up * Time.deltaTime * floatForce, Space.World);
-        //}
-
-        void Update()
-        {
-            if (CollidedObject && Vector3.Distance(CollidedObject.transform.position, this.transform.position) > 464.5f)
-            {
-                CollidedObject.transform.parent.gameObject.SetActive(false);
-                _Platforms.Enqueue(CollidedObject.transform.parent.gameObject);
-                CollidedObject = null;
-                m_TriggeredOnce = false;
-            }
-
-            transform.Translate(transform.InverseTransformDirection(transform.forward) * Time.deltaTime * m_Speed);
-            //if (Input.GetMouseButton(0))
+            // Limit the upward movement by setting the y-velocity to a maximum value
+            //if(transform.position.y < m_UpBound)
             //{
-            //    transform.Translate(transform.InverseTransformDirection(transform.up) * Time.deltaTime * floatForce);
-            //    transform.Rotate(Vector3.right * Time.deltaTime * -PositiveRotationSpeed);
-            //    m_RigidBody.useGravity = false;
+            //    m_RigidBody.velocity = new Vector3(m_RigidBody.velocity.x,0, m_RigidBody.velocity.z);
             //}
             //else
             //{
-            //    m_RigidBody.useGravity = true;
-            //    Quaternion targetRotation = Quaternion.Euler(90, 0, 0);
-            //    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, NegativeRotationSpeed * Time.deltaTime);
+            //    m_RigidBody.velocity = Vector3.up * floatForce;
+            //    if (m_RigidBody.velocity.y > floatForce)
+            //    {
+            //        m_RigidBody.velocity = new Vector3(m_RigidBody.velocity.x, floatForce, m_RigidBody.velocity.z);
+            //    }
+
             //}
         }
+
     }
 }
 

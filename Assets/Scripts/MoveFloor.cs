@@ -16,7 +16,7 @@ namespace com.CasualGames.SwoopGame
         // Update is called once per frame
         void Update()
         {
-            //this.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
+            this.transform.Translate(-Vector3.forward * moveSpeed * Time.deltaTime);
         }
     }
 }
