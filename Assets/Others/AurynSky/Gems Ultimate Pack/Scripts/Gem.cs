@@ -5,7 +5,7 @@ namespace com.CasualGames.SwoopGame
     public class Gem : MonoBehaviour
     {
 
-        public ScriptableObject _Data;
+        public GemData _Data;
 
         public GameObject _Particles;
 
@@ -34,15 +34,26 @@ namespace com.CasualGames.SwoopGame
         // Use this for initialization
         void Start()
         {
-            this._Particles.SetActive(false);
-        }
+            if(this._Particles != null) 
+            {
+                this._Particles.SetActive(false);
+            }
 
+
+        }
+        //to destroy gem after collected
         public IEnumerator KillGem()
         {
             this.gameObject.SetActive(false);
-            this._Particles.SetActive(true);
+            if (this._Particles != null)
+            {
+                this._Particles.SetActive(true);
+            }
             yield return new WaitForSeconds(1f);
-            this._Particles.SetActive(false);
+            if (this._Particles != null)
+            {
+                this._Particles.SetActive(false);
+            }
         }
 
         private void OnDisable()

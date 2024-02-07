@@ -29,6 +29,8 @@ namespace com.CasualGames.SwoopGame
 
         [SerializeField] private float m_UpBound;
 
+        [SerializeField] private float m_LowerBound;
+
         [Header("PlatformPoolProps")]
 
         public List<GameObject> _PlatformsPool;
@@ -45,9 +47,23 @@ namespace com.CasualGames.SwoopGame
 
         private bool m_PlaneCrashed;
 
-        public static Action _PlaneCrashed;
+        public static Action _PlaneCrashedAction;
 
-        public GameObject target;
+        [Header("Plane fuel Props")]
+
+        [SerializeField] private float m_MaxFuel;
+
+        [SerializeField] private float m_Fuel;
+
+        private float m_CurrentFuel;
+
+        private bool _FuelBlocker = false;
+
+        [Header("Player Score Props")]
+
+        private int CurrentScore;
+
+        public static Action<int> _UpdateScore;
 
         void Start()
         {
@@ -56,18 +72,47 @@ namespace com.CasualGames.SwoopGame
 
         private void OnTriggerEnter(Collider other)
         {
+            //while hitting on Obstacles
             Gem gem;
             if (other.GetComponent<Gem>() != null)
             {
                 gem = other.GetComponent<Gem>();
                 StartCoroutine(gem.KillGem());
+
+                if (gem._Data._ObjectName == "Cloud")
+                {
+                    _FuelBlocker = true;
+                    if (m_CurrentFuel > 0)
+                    {
+                        m_CurrentFuel -= gem._Data._Fuel;
+                        Fuel.Instance.SetFuelValue(false, m_CurrentFuel);
+                        _FuelBlocker = false;
+                    }
+                }
+
+                if (gem._Data._ObjectName == "Fuel")
+                {
+                    _FuelBlocker = true;
+                    m_CurrentFuel = (m_CurrentFuel + gem._Data._Fuel) >= m_MaxFuel ? m_MaxFuel : (m_CurrentFuel + gem._Data._Fuel);
+                    Fuel.Instance.SetFuelValue(false, m_CurrentFuel);
+                    _FuelBlocker = false;
+                    AudioManager.Instance.PlayObstaclesAudio(gem._Data._ObjectName);
+                }
+
+                if (gem._Data._ObjectName == "Score" || gem._Data._ObjectName == "star")
+                {
+                    CurrentScore += gem._Data._Score;
+                    _UpdateScore?.Invoke(CurrentScore);
+                    AudioManager.Instance.PlayObstaclesAudio(gem._Data._ObjectName);
+                }
             }
-   
+            //while plane crash
             if (other.tag == "Crash")
             {
                 m_PlaneCrashed = true;
                 _Platforms.Clear();
-                _PlaneCrashed?.Invoke();
+                AudioManager.Instance.PlayObstaclesAudio("Crash");
+                _PlaneCrashedAction?.Invoke();
             }
 
             if (other.tag == "PlatformTrigger" && !m_TriggeredOnce && !m_PlaneCrashed)
@@ -87,17 +132,26 @@ namespace com.CasualGames.SwoopGame
             {
                 this.transform.position = new Vector3(this.transform.position.x, m_UpBound, this.transform.position.z);
             }
+
+            if (transform.position.y < m_LowerBound)
+            {
+                m_PlaneCrashed = true;
+                _Platforms.Clear();
+                _PlaneCrashedAction?.Invoke();
+            }
             MovePlane();
         }
 
+        //to move plane
         private void MovePlane()
         {
+            
             if (m_PlaneCrashed)
             {
                 m_RigidBody.useGravity = false;
                 return;
             }
-
+            AudioManager.Instance.PlayPlaneAudio();
             if (CollidedObject && Vector3.Distance(CollidedObject.transform.position, this.transform.position) > 464.5f)
             {
                 CollidedObject.transform.parent.gameObject.SetActive(false);
@@ -107,16 +161,18 @@ namespace com.CasualGames.SwoopGame
             }
 
             transform.Translate(transform.InverseTransformDirection(transform.forward) * Time.deltaTime * m_Speed);
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && m_CurrentFuel >= 0)
             {
-                //m_RigidBody.useGravity = false;
                 transform.Translate(transform.InverseTransformDirection(transform.up) * Time.deltaTime * floatForce);
                 transform.Rotate(Vector3.right * Time.deltaTime * -PositiveRotationSpeed);
-                //MovePlaneUpward();
+                if (!_FuelBlocker)
+                {
+                    m_CurrentFuel -= m_Fuel * Time.deltaTime;
+                    Fuel.Instance.SetFuelValue(false, m_CurrentFuel);
+                }
             }
             else
             {
-                //m_RigidBody.useGravity = true;
                 Quaternion targetRotation = Quaternion.Euler(90, 0, 0);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, NegativeRotationSpeed * Time.deltaTime);
                 transform.Translate(transform.InverseTransformDirection(-transform.up) * Time.deltaTime * floatForce);
@@ -134,6 +190,8 @@ namespace com.CasualGames.SwoopGame
             m_PlaneCrashed = false;
 
             this.transform.position = m_PlaneInitialPos;
+            m_CurrentFuel = m_MaxFuel;
+            Fuel.Instance.SetFuelValue(true,m_MaxFuel);
             foreach (GameObject p in _PlatformsPool)
             {
                 GameObject platform = Instantiate(p);

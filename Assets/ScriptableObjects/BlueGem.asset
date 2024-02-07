@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: BlueGem
   m_EditorClassIdentifier: 
   _ObjectName: Score
-  _Score: 4
+  _Score: 1
   _Fuel: 0

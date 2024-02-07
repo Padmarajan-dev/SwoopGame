@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: GreenGem
   m_EditorClassIdentifier: 
   _ObjectName: Fuel
-  _Score: 3
-  _Fuel: 0
+  _Score: 0
+  _Fuel: 1

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Star
   m_EditorClassIdentifier: 
   _ObjectName: star
-  _Score: 8
+  _Score: 2
   _Fuel: 0

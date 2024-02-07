@@ -10,6 +10,6 @@ namespace com.CasualGames.SwoopGame
 
         public int _Score;
 
-        public int _Fuel;
+        public float _Fuel;
     }
 }
